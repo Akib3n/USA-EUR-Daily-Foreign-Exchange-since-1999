@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 # Get Dataset from GitHub
-Dataset_url = 'https://raw.githubusercontent.com/Akib3n/USA-EUR-Daily-Foreign-Exchange-since-1999/main/daily.csv'
+Dataset_url = 'datasets/daily.csv'
 
 # Load the dataset
 Dataset = pd.read_csv(Dataset_url)
