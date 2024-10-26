@@ -8,3 +8,5 @@ preprocessed = 'datasets/preprocessed.csv'
 
 # Load the dataset
 fexchange = pd.read_csv(preprocessed)
+
+print(fexchange.head())
