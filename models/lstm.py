@@ -1,3 +1,4 @@
+# Import Libraries
 import os
 import joblib
 import pandas as pd
@@ -30,10 +31,10 @@ country_data = fexchange[fexchange['Country'] == country]
 country_data.set_index('Date', inplace=True)
 country_data.sort_index(inplace=True)
 
-# Ensure we have a daily frequency and fill missing dates if necessary
+# Fill-in missing data for days
 country_data = country_data.asfreq('D')
 
-# Handle missing values (forward fill)
+# Handle missing values 
 country_data['Exchange rate'] = country_data['Exchange rate'].ffill()
 
 # Prepare data for LSTM
@@ -45,17 +46,17 @@ def create_dataset(data, time_step=1):
         y.append(data[i + time_step, 0])
     return np.array(X), np.array(y)
 
-# Normalize the data
+# Normalize data
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_data = scaler.fit_transform(country_data[['Exchange rate']].values)
 
-# Define time step
+# Define time step (30 days)
 time_step = 30
 
 # Create the dataset
 X, y = create_dataset(scaled_data, time_step)
 
-# Reshape input to be [samples, time steps, features] which is required for LSTM
+# LSTM input reshaping
 X = X.reshape(X.shape[0], X.shape[1], 1)
 
 # Build the LSTM model
@@ -74,10 +75,11 @@ early_stopping = EarlyStopping(monitor='loss', patience=10, restore_best_weights
 # Train the model
 model.fit(X, y, epochs=100, batch_size=32, callbacks=[early_stopping])
 
-# Forecast for the next 30 days
+# Predict 30 days
 last_sequence = scaled_data[-time_step:]
 predictions = []
 for _ in range(30):
+
     # Prepare input for the model using the last available sequence
     input_features = last_sequence.reshape(1, time_step, 1)
     prediction = model.predict(input_features)
@@ -85,7 +87,7 @@ for _ in range(30):
     # Append prediction to results
     predictions.append(prediction[0, 0])
     
-    # Update last_sequence with new prediction for next iteration
+    # Update last_sequence with new prediction
     last_sequence = np.append(last_sequence[1:], prediction, axis=0)
 
 # Inverse transform the predictions to get the actual values
@@ -98,7 +100,7 @@ forecast_df = pd.DataFrame({
     'Predicted Exchange Rate': predictions.flatten()
 })
 
-# Output results (optional)
+# Output results
 print(forecast_df)
 
 # Ensure the models directory exists
