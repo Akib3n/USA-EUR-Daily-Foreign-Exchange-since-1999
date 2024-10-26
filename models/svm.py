@@ -1,3 +1,8 @@
+""" DATASET URL: https://datahub.io/core/exchange-rates#daily """
+
+""" 
+**I. Import Libraries**
+"""
 import os
 import joblib
 import pandas as pd
@@ -6,15 +11,25 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report
 
+""" 
+**II. Exploratory Data Analysis**
+"""
 # Constants
 preprocessed = 'datasets/preprocessed.csv'
 SVM_MODEL_DIR = 'models'
 SVM_MODEL_PATH = os.path.join(SVM_MODEL_DIR, 'svm.pkl')
 
+# Load the dataset
+fexchange = pd.read_csv(preprocessed)
+
+# Display first five(5) rows
+print(fexchange.head())
+
+""" 
+**III. Model Development**
+"""
 # Function for testing and training selected country
 def train_and_test_svm(selected_country):
-    # Load the dataset
-    fexchange = pd.read_csv(preprocessed)
 
     # Convert 'Date' column to datetime format
     fexchange['Date'] = pd.to_datetime(fexchange['Date'])
@@ -57,6 +72,9 @@ def train_and_test_svm(selected_country):
     svm_model = SVC(kernel='linear', gamma='auto', class_weight='balanced')
     svm_model.fit(X_train, y_train)
 
+    """
+    **IV. Model Evaluation**
+    """
     # Evaluate the SVM model
     svm_pred = svm_model.predict(X_test)
 
@@ -71,5 +89,18 @@ def train_and_test_svm(selected_country):
     joblib.dump(svm_model, SVM_MODEL_PATH)
 
 # Select Country to train and test
-train_and_test_svm(selected_country='Malaysia')  
+train_and_test_svm(selected_country='Malaysia')
 
+"""
+**V. Model Evaluation Results**
+
+              precision    recall  f1-score   support
+
+           0       0.70      0.50      0.58      1455
+           1       0.46      0.67      0.55       938
+
+    accuracy                           0.56      2393
+   macro avg       0.58      0.58      0.56      2393
+weighted avg       0.61      0.56      0.57      2393
+
+"""

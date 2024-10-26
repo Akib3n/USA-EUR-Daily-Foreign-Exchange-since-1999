@@ -1,3 +1,8 @@
+""" DATASET URL: https://datahub.io/core/exchange-rates#daily """
+
+""" 
+**I. Import Libraries**
+"""
 import os
 import joblib
 import pandas as pd
@@ -6,6 +11,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import TimeSeriesSplit, cross_val_score
 
+""" 
+**II. Exploratory Data Analysis**
+"""
 # Constants
 preprocessed = 'datasets/preprocessed.csv'
 LR_MODEL_DIR = 'models'
@@ -15,6 +23,12 @@ country = 'Malaysia'  # Replace with the desired country code
 # Load the dataset
 fexchange = pd.read_csv(preprocessed)
 
+# Display first five(5) rows
+print(fexchange.head())
+
+""" 
+**III. Model Development**
+"""
 # Convert 'Date' column to datetime format
 fexchange['Date'] = pd.to_datetime(fexchange['Date'])
 
@@ -85,6 +99,9 @@ if not os.path.exists(LR_MODEL_DIR):
 # Save the model (if needed)
 joblib.dump(model, LR_MODEL_PATH)
 
+"""
+**IV. Model Evaluation**
+"""
 # Model Evaluation
 y_pred = model.predict(X)
 mae = mean_absolute_error(y, y_pred)
@@ -110,3 +127,16 @@ cv_scores = cross_val_score(model, X, y, cv=tscv, scoring='neg_mean_squared_erro
 cv_rmse_scores = np.sqrt(-cv_scores)
 print(f"Cross-validated RMSE scores: {cv_rmse_scores}")
 print(f"Mean cross-validated RMSE: {cv_rmse_scores.mean()}")
+
+"""
+**V. Model Evaluation Results**
+
+Mean Absolute Error (MAE): 0.006859700050566238
+Mean Squared Error (MSE): 0.00015997345659921633
+Root Mean Squared Error (RMSE): 0.01264806137711295
+R² Score: 0.9987729789719144
+Mean Absolute Percentage Error (MAPE): 0.19448911766148128%
+Cross-validated RMSE scores: [0.00247744 0.01420101 0.01544178 0.01438639 0.02002324]
+Mean cross-validated RMSE: 0.013305973852264629
+
+"""

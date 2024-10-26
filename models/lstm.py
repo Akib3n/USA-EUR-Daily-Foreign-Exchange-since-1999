@@ -1,4 +1,8 @@
-# Import Libraries
+""" DATASET URL: https://datahub.io/core/exchange-rates#daily """
+
+""" 
+**I. Import Libraries**
+"""
 import os
 import joblib
 import pandas as pd
@@ -9,15 +13,26 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.callbacks import EarlyStopping
 
+""" 
+**II. Exploratory Data Analysis**
+"""
 # Constants
 preprocessed = 'datasets/preprocessed.csv'
 LSTM_MODEL_DIR = 'models'
 LSTM_MODEL_PATH = os.path.join(LSTM_MODEL_DIR, 'lstm.pkl')
 country = 'Malaysia'  # Replace with the desired country code
 
+
 # Load the dataset
 fexchange = pd.read_csv(preprocessed)
 
+# Display first five(5) rows
+print(fexchange.head())
+
+
+""" 
+**III. Model Development**
+"""
 # Convert 'Date' column to datetime format
 fexchange['Date'] = pd.to_datetime(fexchange['Date'])
 
@@ -110,6 +125,9 @@ if not os.path.exists(LSTM_MODEL_DIR):
 # Save the model (if needed)
 joblib.dump(model, LSTM_MODEL_PATH)
 
+"""
+**IV. Model Evaluation**
+"""
 # Model Evaluation
 y_true = country_data['Exchange rate'].values[time_step + 1:]
 y_pred = scaler.inverse_transform(model.predict(X)).flatten()
@@ -130,3 +148,14 @@ print(f"Mean Squared Error (MSE): {mse}")
 print(f"Root Mean Squared Error (RMSE): {rmse}")
 print(f"R² Score: {r2}")
 print(f"Mean Absolute Percentage Error (MAPE): {mape}%")
+
+"""
+**V. Model Evaluation Results**
+
+Mean Absolute Error (MAE): 0.014612431770762945
+Mean Squared Error (MSE): 0.0003450247077195674
+Root Mean Squared Error (RMSE): 0.01857484071855173
+R² Score: 0.997369383041952
+Mean Absolute Percentage Error (MAPE): 0.40180434230250156%
+
+"""

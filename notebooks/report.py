@@ -1,9 +1,16 @@
-# Import Libraries
+""" DATASET URL: https://datahub.io/core/exchange-rates#daily """
+
+""" 
+**I. Import Libraries **
+"""
 import os
 import pandas as pd
 import numpy as np
 
-# Get Dataset from GitHub
+""" 
+**II. Exploratory Data Analysis**
+"""
+# Get Dataset
 Dataset_url = 'https://raw.githubusercontent.com/Akib3n/USA-EUR-Daily-Foreign-Exchange-since-1999/main/daily.csv'
 
 # Load the dataset
