@@ -17,6 +17,9 @@ fexchange = pd.read_csv(preprocessed)
 # Convert 'Date' column to datetime format
 fexchange['Date'] = pd.to_datetime(fexchange['Date'])
 
+# Filter data for 1999 and abov
+fexchange = fexchange[fexchange['Date'].dt.year >= 1999]
+
 # Create lagged features
 fexchange['Lagged_1'] = fexchange.groupby('Country')['Exchange rate'].shift(1)
 fexchange['Lagged_2'] = fexchange.groupby('Country')['Exchange rate'].shift(2)
