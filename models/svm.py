@@ -11,48 +11,65 @@ preprocessed = 'datasets/preprocessed.csv'
 SVM_MODEL_DIR = 'models'
 SVM_MODEL_PATH = os.path.join(SVM_MODEL_DIR, 'svm.pkl')
 
-# Load the dataset
-fexchange = pd.read_csv(preprocessed)
+# Function for testing and training selected country
+def train_and_test_svm(selected_country):
+    # Load the dataset
+    fexchange = pd.read_csv(preprocessed)
 
-# Convert 'Date' column to datetime format
-fexchange['Date'] = pd.to_datetime(fexchange['Date'])
+    # Convert 'Date' column to datetime format
+    fexchange['Date'] = pd.to_datetime(fexchange['Date'])
 
-# Filter data for 1999 and abov
-fexchange = fexchange[fexchange['Date'].dt.year >= 1999]
+    # Filter data for the selected country
+    fexchange = fexchange[fexchange['Country'] == selected_country]
 
-# Create lagged features
-fexchange['Lagged_1'] = fexchange.groupby('Country')['Exchange rate'].shift(1)
-fexchange['Lagged_2'] = fexchange.groupby('Country')['Exchange rate'].shift(2)
+    # Create lagged features directly from daily data
+    fexchange['Lagged_1'] = fexchange.groupby('Country')['Exchange rate'].shift(1)
+    fexchange['Lagged_2'] = fexchange.groupby('Country')['Exchange rate'].shift(2)
+    fexchange['Lagged_3'] = fexchange.groupby('Country')['Exchange rate'].shift(3)
+    fexchange['Lagged_4'] = fexchange.groupby('Country')['Exchange rate'].shift(4)
+    fexchange['Lagged_5'] = fexchange.groupby('Country')['Exchange rate'].shift(5)
+    fexchange['Lagged_6'] = fexchange.groupby('Country')['Exchange rate'].shift(6)
 
-# Moving Average feature
-fexchange['MA3'] = fexchange.groupby('Country')['Exchange rate'].transform(lambda x: x.rolling(window=3).mean())
+    # Moving Average feature (10-day moving average)
+    fexchange['MA10'] = fexchange.groupby('Country')['Exchange rate'].transform(lambda x: x.rolling(window=10).mean())
 
-# Target Variable
-fexchange['Predicted rate'] = (fexchange['Exchange rate'].shift(-1) > fexchange['Exchange rate']).astype(int)
+    # Predicted Rate
+    fexchange['Predicted rate'] = (fexchange['Exchange rate'].shift(-1) > fexchange['Exchange rate']).astype(int)
 
-# Remove Rows with no values from lagged and moving average
-fexchange.dropna(inplace=True)
+    # Remove rows with NaN values from adding lagged and moving average
+    fexchange.dropna(inplace=True)
 
-# Feature Engineering
-features = ['Lagged_1', 'Lagged_2', 'MA3']
-target = 'Predicted rate'
+    print(f"Data count for {selected_country}:")
+    print(fexchange.count())
 
-# Train model
-X = np.asarray(fexchange[features])
-y = np.asarray(fexchange[target])
+    # Feature Engineering
+    features = ['Lagged_1', 'Lagged_2', 'Lagged_3', 'Lagged_4', 'Lagged_5', 'Lagged_6','MA10']
+    target = 'Predicted rate'
 
-# Split dataset into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=42)
+    # Train model
+    X = np.asarray(fexchange[features])
+    y = np.asarray(fexchange[target])
 
-# Initialize and train SVM model
-svm_model = SVC(kernel='linear', gamma='auto')
-svm_model.fit(X_train, y_train)
+    # Split dataset into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Evaluate the SVM model
-svm_pred = svm_model.predict(X_test)
+    # Initialize and train SVM model
+    svm_model = SVC(kernel='linear', gamma='auto', class_weight='balanced')
+    svm_model.fit(X_train, y_train)
 
-# Check prediction
-print(classification_report(y_test, svm_pred))
+    # Evaluate the SVM model
+    svm_pred = svm_model.predict(X_test)
 
-# Save SVM model
-joblib.dump(svm_model, SVM_MODEL_PATH)
+    # Check prediction
+    print(classification_report(y_test, svm_pred))
+
+    # Ensure the models directory exists
+    if not os.path.exists(SVM_MODEL_DIR):
+        os.makedirs(SVM_MODEL_DIR)
+
+    # Save SVM model
+    joblib.dump(svm_model, SVM_MODEL_PATH)
+
+# Select Country to train and test
+train_and_test_svm(selected_country='Malaysia')  
+
