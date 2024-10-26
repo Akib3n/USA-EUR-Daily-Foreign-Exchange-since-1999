@@ -1,0 +1,1 @@
+# USA-EUR-Daily-Foreign-Exchange-since-1999
